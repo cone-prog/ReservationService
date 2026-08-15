@@ -1,12 +1,11 @@
+using ReservationService;
+
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddOpenApi();
+builder.Services.AddAllServices(builder.Configuration);
 
 var app = builder.Build();
 
-app.MapOpenApi();
-app.MapScalarApiReference();
-
-app.UseHttpsRedirection();
+app.UseAppServices();
 
 app.Run();
