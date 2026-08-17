@@ -1,0 +1,9 @@
+services:
+  reservation-db:
+    image: postgres:18
+    ports: 
+      - "7010:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: Reservation-db
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}

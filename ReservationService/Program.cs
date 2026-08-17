@@ -2,10 +2,10 @@ using ReservationService;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddAllServices(builder.Configuration);
+await builder.Services.AddApiServices(builder.Configuration);
 
 var app = builder.Build();
 
-app.UseAppServices();
+await app.UseApiServices();
 
 app.Run();
