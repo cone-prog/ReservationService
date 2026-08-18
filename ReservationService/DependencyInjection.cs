@@ -1,20 +1,22 @@
+using ReservationService.Infrastructure.Context;
 using ReservationService.Infrastructure.Extensions;
+using ReservationService.Infrastructure.Repositories;
 
 namespace ReservationService;
 
 public static class DependencyInjection
 {
-    public static async Task<IServiceCollection> AddApiServices(
+    public static IServiceCollection AddApiServices(
         this IServiceCollection services, IConfiguration configuration)
     {
-        await Initial.InitialDataBaseAsync(configuration, new CancellationToken());
+        services.AddSingleton<DapperContext>();
+        services.AddScoped<IWorkspaceRepository, WorkspaceRepository>();
         services.AddOpenApi();
         return services;
     }
 
     public static async Task<WebApplication> UseApiServices(this WebApplication app)
     {
-        var connectionString = app.Configuration.GetConnectionString("PgConnection");
         await Initial.InitialDataBaseAsync(app.Configuration, app.Lifetime.ApplicationStopping);
         app.MapOpenApi();
         app.MapScalarApiReference();
