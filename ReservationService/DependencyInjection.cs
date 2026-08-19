@@ -1,3 +1,4 @@
+using ReservationService.Endpoints.Workspace.Get;
 using ReservationService.Infrastructure.Context;
 using ReservationService.Infrastructure.Extensions;
 using ReservationService.Infrastructure.Repositories;
@@ -11,6 +12,10 @@ public static class DependencyInjection
     {
         services.AddSingleton<DapperContext>();
         services.AddScoped<IWorkspaceRepository, WorkspaceRepository>();
+        services.AddCarter();
+        services.AddScoped<GetWorkspacesHandler>();
+        var assembly = typeof(Program).Assembly;
+        services.AddValidatorsFromAssembly(assembly);
         services.AddOpenApi();
         return services;
     }
@@ -20,6 +25,7 @@ public static class DependencyInjection
         await Initial.InitialDataBaseAsync(app.Configuration, app.Lifetime.ApplicationStopping);
         app.MapOpenApi();
         app.MapScalarApiReference();
+        app.MapCarter();
         app.UseHttpsRedirection();
         return app;
     }

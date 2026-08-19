@@ -1,5 +1,5 @@
 using Dapper;
-using ReservationService.Endpoints.Workspace;
+using ReservationService.Endpoints.Workspace.Get;
 using ReservationService.Infrastructure.Context;
 using ReservationService.Models;
 
@@ -7,10 +7,10 @@ namespace ReservationService.Infrastructure.Repositories;
 
 public class WorkspaceRepository(DapperContext dbContext) : IWorkspaceRepository
 {
-    public async Task<List<Workspace>> GetAsync(FilterAndPaginationDto filterAndPaginationDto,
+    public async Task<List<Workspace>> GetAsync(GetWorkspacesRequest request,
         CancellationToken cancellationToken)
     {
-        var skip = (filterAndPaginationDto.PageNumber - 1) * filterAndPaginationDto.PageSize;
+        var skip = (request.PageNumber - 1) * request.PageSize;
         var query = """
             SELECT *
             FROM Workspace
@@ -25,12 +25,12 @@ public class WorkspaceRepository(DapperContext dbContext) : IWorkspaceRepository
             commandText: query,
             parameters: new
             {
-                Name = filterAndPaginationDto.Name is null
+                Name = request.Name is null
                     ? null
-                    : "%" + filterAndPaginationDto.Name + "%",
+                    : "%" + request.Name + "%",
                 Skip = skip,
-                filterAndPaginationDto.IsActive,
-                filterAndPaginationDto.PageSize
+                request.IsActive,
+                request.PageSize
             },
             cancellationToken: cancellationToken
         ))).ToList();

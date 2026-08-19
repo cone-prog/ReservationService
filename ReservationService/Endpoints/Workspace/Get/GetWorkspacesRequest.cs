@@ -1,6 +1,6 @@
-namespace ReservationService.Endpoints.Workspace;
+namespace ReservationService.Endpoints.Workspace.Get;
 
-public record FilterAndPaginationDto
+public record GetWorkspacesRequest
 (
     string? Name,
     bool? IsActive,
