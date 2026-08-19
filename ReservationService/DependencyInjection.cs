@@ -1,4 +1,5 @@
 using ReservationService.Endpoints.Workspace.Get;
+using ReservationService.Endpoints.Workspace.GetById;
 using ReservationService.Infrastructure.Context;
 using ReservationService.Infrastructure.Extensions;
 using ReservationService.Infrastructure.Repositories;
@@ -14,7 +15,9 @@ public static class DependencyInjection
         services.AddScoped<IWorkspaceRepository, WorkspaceRepository>();
         services.AddCarter();
         services.AddScoped<GetWorkspacesHandler>();
+        services.AddScoped<GetWorkspaceByIdHandler>();
         var assembly = typeof(Program).Assembly;
+        TypeAdapterConfig.GlobalSettings.Scan(assembly);
         services.AddValidatorsFromAssembly(assembly);
         services.AddOpenApi();
         return services;
