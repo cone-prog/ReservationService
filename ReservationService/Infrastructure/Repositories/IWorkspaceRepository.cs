@@ -1,4 +1,5 @@
 using ReservationService.Endpoints.Workspace.Get;
+using ReservationService.Endpoints.Workspace.GetAvailabilitySlots;
 using ReservationService.Models;
 
 namespace ReservationService.Infrastructure.Repositories;
@@ -9,5 +10,8 @@ public interface IWorkspaceRepository
         CancellationToken cancellationToken);
 
     Task<Workspace?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+
+    Task<List<Slot>> GetAvailabilitySlotsAsync(Guid id,
+        DateOnly date, CancellationToken cancellationToken);
 }
 

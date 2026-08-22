@@ -1,8 +1,8 @@
 using ReservationService.Endpoints.Workspace.Get;
+using ReservationService.Endpoints.Workspace.GetAvailabilitySlots;
 using ReservationService.Endpoints.Workspace.GetById;
 using ReservationService.Infrastructure.Context;
 using ReservationService.Infrastructure.Extensions;
-using ReservationService.Infrastructure.Repositories;
 
 namespace ReservationService;
 
@@ -16,6 +16,7 @@ public static class DependencyInjection
         services.AddCarter();
         services.AddScoped<GetWorkspacesHandler>();
         services.AddScoped<GetWorkspaceByIdHandler>();
+        services.AddScoped<GetAvailableSlotsHandler>();
         var assembly = typeof(Program).Assembly;
         TypeAdapterConfig.GlobalSettings.Scan(assembly);
         services.AddValidatorsFromAssembly(assembly);
