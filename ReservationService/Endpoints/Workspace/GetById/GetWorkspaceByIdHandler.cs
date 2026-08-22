@@ -1,5 +1,5 @@
 using ReservationService.Endpoints.Workspace.Dtos;
-using ReservationService.Infrastructure.Repositories;
+using ReservationService.Exceptions;
 
 namespace ReservationService.Endpoints.Workspace.GetById;
 
@@ -9,10 +9,12 @@ public class GetWorkspaceByIdHandler(IWorkspaceRepository repository,
     public async Task<WorkspaceDto> GetWorkspaceByIdAsync(
         GetWorkspaceByIdRequest request, CancellationToken cancellationToken)
     {
-        var resultValidator = await validator.ValidateAsync(request, cancellationToken);
-        if (!resultValidator.IsValid)
-            throw new ValidationException(resultValidator.Errors);
+
+        var validationResult = await validator.ValidateAsync(request, cancellationToken);
+        if (!validationResult.IsValid)
+            throw new ValidationException(validationResult.Errors);
         var workspace = await repository.GetByIdAsync(request.Id, cancellationToken);
-        return workspace is not null ? workspace.Adapt<WorkspaceDto>() : throw new Exception();
+        return workspace is not null ? workspace.Adapt<WorkspaceDto>()
+            : throw new NotFoundException("Место", request.Id);
     }
 }

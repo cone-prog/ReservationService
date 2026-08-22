@@ -6,6 +6,8 @@ namespace ReservationService.Infrastructure.Repositories;
 
 public interface IWorkspaceRepository
 {
+    Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken);
+
     Task<List<Workspace>> GetAsync(GetWorkspacesRequest filterAndPaginationDto,
         CancellationToken cancellationToken);
 

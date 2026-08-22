@@ -1,6 +1,7 @@
 using ReservationService.Endpoints.Workspace.Get;
 using ReservationService.Endpoints.Workspace.GetAvailabilitySlots;
 using ReservationService.Endpoints.Workspace.GetById;
+using ReservationService.Handlers;
 using ReservationService.Infrastructure.Context;
 using ReservationService.Infrastructure.Extensions;
 
@@ -17,6 +18,8 @@ public static class DependencyInjection
         services.AddScoped<GetWorkspacesHandler>();
         services.AddScoped<GetWorkspaceByIdHandler>();
         services.AddScoped<GetAvailableSlotsHandler>();
+        services.AddExceptionHandler<ValidationExceptionHandler>();
+        services.AddExceptionHandler<GlobalExceptionHandler>();
         var assembly = typeof(Program).Assembly;
         TypeAdapterConfig.GlobalSettings.Scan(assembly);
         services.AddValidatorsFromAssembly(assembly);
@@ -30,6 +33,7 @@ public static class DependencyInjection
         app.MapOpenApi();
         app.MapScalarApiReference();
         app.MapCarter();
+        app.UseExceptionHandler(options => { });
         app.UseHttpsRedirection();
         return app;
     }

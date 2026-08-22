@@ -80,4 +80,19 @@ public class WorkspaceRepository(DapperContext dbContext) : IWorkspaceRepository
         ));
         return slots.ToList();
     }
+
+    public async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken)
+    {
+        var query = """
+            SELECT EXISTS (SELECT 1 FROM Workspace 
+                           WHERE Id = @id)
+        """;
+        using var dbConnection = dbContext.CreateConnection();
+        var result = await dbConnection.ExecuteScalarAsync<bool>(new CommandDefinition(
+            commandText: query,
+            parameters: new { id },
+            cancellationToken: cancellationToken
+        ));
+        return result;
+    }
 }
