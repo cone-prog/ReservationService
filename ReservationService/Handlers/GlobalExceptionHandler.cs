@@ -16,6 +16,18 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
                 exception.Message
             ),
 
+            SlotNotAvailableException => (
+                httpContext.Response.StatusCode = StatusCodes.Status409Conflict,
+                exception.GetType().Name,
+                exception.Message
+            ),
+
+            WorkspaceNotActiveException => (
+                httpContext.Response.StatusCode = StatusCodes.Status409Conflict,
+                exception.GetType().Name,
+                exception.Message
+            ),
+
             _ => (
                 httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError,
                 "Необработанное исключение",

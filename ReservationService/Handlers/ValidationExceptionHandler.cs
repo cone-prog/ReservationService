@@ -25,7 +25,7 @@ public class ValidationExceptionHandler : IExceptionHandler
             Status = httpContext.Response.StatusCode,
             Instance = httpContext.Request.Path,
             Errors = errors,
-            Detail = exception.Message
+            Detail = "One or more validation errors occurred."
         };
         await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
         return true;

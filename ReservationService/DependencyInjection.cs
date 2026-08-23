@@ -1,3 +1,4 @@
+using ReservationService.Endpoints.Reservation.Create;
 using ReservationService.Endpoints.Workspace.Get;
 using ReservationService.Endpoints.Workspace.GetAvailabilitySlots;
 using ReservationService.Endpoints.Workspace.GetById;
@@ -14,10 +15,12 @@ public static class DependencyInjection
     {
         services.AddSingleton<DapperContext>();
         services.AddScoped<IWorkspaceRepository, WorkspaceRepository>();
+        services.AddScoped<IReservationRepository, ReservationRepository>();
         services.AddCarter();
         services.AddScoped<GetWorkspacesHandler>();
         services.AddScoped<GetWorkspaceByIdHandler>();
         services.AddScoped<GetAvailableSlotsHandler>();
+        services.AddScoped<CreateReservationHandler>();
         services.AddExceptionHandler<ValidationExceptionHandler>();
         services.AddExceptionHandler<GlobalExceptionHandler>();
         var assembly = typeof(Program).Assembly;
