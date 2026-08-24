@@ -1,10 +1,9 @@
 using ReservationService.Endpoints.Workspace.Dtos;
-using ReservationService.Infrastructure.Repositories;
 
 namespace ReservationService.Endpoints.Workspace.Get;
 
 public class GetWorkspacesHandler(IWorkspaceRepository workspaceRepository,
-    GetWorkspacesRequestValidator validator)
+     IValidator<GetWorkspacesRequest> validator)
 {
     public async Task<List<WorkspaceDto>> GetWorkspacesAsync(GetWorkspacesRequest requestDto,
         CancellationToken cancellationToken)
