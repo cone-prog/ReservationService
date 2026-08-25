@@ -3,14 +3,12 @@ using ReservationService.Exceptions;
 namespace ReservationService.Endpoints.Workspace.GetAvailabilitySlots;
 
 public class GetAvailableSlotsHandler(IWorkspaceRepository repository,
-    GetAvailableSlotsRequestValidator validator)
+    IValidator<GetAvailableSlotsRequest> validator)
 {
     public async Task<AvailableSlots> GetAvailabilitySlotsAsync(
         GetAvailableSlotsRequest request,
         CancellationToken cancellationToken)
     {
-
-
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
