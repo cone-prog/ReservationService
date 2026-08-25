@@ -4,7 +4,7 @@ using ReservationService.Exceptions;
 namespace ReservationService.Endpoints.Workspace.GetById;
 
 public class GetWorkspaceByIdHandler(IWorkspaceRepository repository,
-    GetWorkspaceByIdValidator validator)
+    IValidator<GetWorkspaceByIdRequest> validator)
 {
     public async Task<WorkspaceDto> GetWorkspaceByIdAsync(
         GetWorkspaceByIdRequest request, CancellationToken cancellationToken)
