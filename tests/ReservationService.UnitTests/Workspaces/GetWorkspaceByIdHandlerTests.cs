@@ -44,10 +44,10 @@ public class GetWorkspaceByIdHandlerTests
     }
 
     [Fact]
-    public async Task GetWorkspaceById_WhenWorkspaceNotContains_ShouldThrowNotFoundException()
+    public async Task GetWorkspaceById_WhenWorkspaceDoesNotExist_ShouldThrowNotFoundException()
     {
         var request = new GetWorkspaceByIdRequest(
-            Guid.Empty
+            Guid.Parse("00000000-0000-0000-0000-000000000001")
         );
 
         var workspaceRepository = new Mock<IWorkspaceRepository>();
@@ -82,7 +82,7 @@ public class GetWorkspaceByIdHandlerTests
     }
 
     [Fact]
-    public async Task GetWorkspaceById_WhenRequestValidAndWorkspaceContains_ShouldReturnWorkspace()
+    public async Task GetWorkspaceById_WhenRequestValidAndWorkspaceExists_ShouldReturnWorkspace()
     {
         var workspace = new Workspace()
         {
@@ -120,11 +120,11 @@ public class GetWorkspaceByIdHandlerTests
             request,
             CancellationToken.None);
 
-        Assert.Equal(result.Id, workspace.Id);
-        Assert.Equal(result.Name, workspace.Name);
-        Assert.Equal(result.Description, workspace.Description);
-        Assert.Equal(result.IsActive, workspace.IsActive);
-        Assert.Equal(result.PricePerHour, workspace.PricePerHour);
+        Assert.Equal(workspace.Id, result.Id);
+        Assert.Equal(workspace.Name, result.Name);
+        Assert.Equal(workspace.Description, result.Description);
+        Assert.Equal(workspace.IsActive, result.IsActive);
+        Assert.Equal(workspace.PricePerHour, result.PricePerHour);
 
         workspaceRepository
             .Verify(r => r.GetByIdAsync(
