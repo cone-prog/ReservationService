@@ -5,7 +5,7 @@ namespace ReservationService.Endpoints.Reservation.Create;
 public class CreateReservationHandler(
     IWorkspaceRepository workspaceRepository,
     IReservationRepository reservationRepository,
-    CreateReservationRequestValidator validator)
+    IValidator<CreateReservationRequest> validator)
 {
     public async Task<bool> CreateReservationAsync(CreateReservationRequest request,
         CancellationToken cancellationToken)
