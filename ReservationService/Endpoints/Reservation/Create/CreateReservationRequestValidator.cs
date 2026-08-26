@@ -20,6 +20,5 @@ public class CreateReservationRequestValidator
         RuleFor(r => r.Dto.StartAt)
             .GreaterThanOrEqualTo(DateTime.UtcNow)
             .WithMessage("Бронь на уже прошедший период невозможна");
-
     }
 }
