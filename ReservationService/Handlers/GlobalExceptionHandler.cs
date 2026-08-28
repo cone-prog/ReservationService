@@ -28,7 +28,7 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
                 exception.Message
             ),
 
-            ConfirmationForbiddenException => (
+            ForbiddenChangeStatusException => (
                 httpContext.Response.StatusCode = StatusCodes.Status409Conflict,
                 exception.GetType().Name,
                 exception.Message

@@ -99,4 +99,21 @@ public class ReservationRepository(DapperContext dbContext) : IReservationReposi
             cancellationToken: cancellationToken
         ));
     }
+
+    public async Task CancelReservationAsync(Guid id, CancellationToken cancellationToken)
+    {
+        var query = """
+            UPDATE Reservation SET Status = 'Cancelled' WHERE Id = @id
+        """;
+
+        using var dbConnection = dbContext.CreateConnection();
+        await dbConnection.ExecuteAsync(new CommandDefinition(
+            commandText: query,
+            parameters: new
+            {
+                id,
+            },
+            cancellationToken: cancellationToken
+        ));
+    }
 }

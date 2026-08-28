@@ -1,14 +1,13 @@
 using ReservationService.Exceptions;
 using ReservationService.Models;
 
-namespace ReservationService.Endpoints.Reservation.Confirm;
+namespace ReservationService.Endpoints.Reservation.Cancel;
 
-public class ConfirmReservationHandler(
-    IReservationRepository repository,
-    IValidator<ConfirmReservationRequest> validator)
+public class CancelReservationHandler(IReservationRepository repository,
+    IValidator<CancelReservationRequest> validator)
 {
-    public async Task ConfirmReservationAsync(
-        ConfirmReservationRequest request, CancellationToken cancellationToken)
+    public async Task CancelReservationAsync(CancelReservationRequest request,
+        CancellationToken cancellationToken)
     {
         var validationResult = await validator.ValidateAsync(request,
             cancellationToken);
@@ -22,10 +21,11 @@ public class ConfirmReservationHandler(
         if (reservation is null)
             throw new NotFoundException("Бронирование", request.Id);
 
-        if (reservation.Status != ReservationStatus.Pending)
+        if (!(reservation.Status == ReservationStatus.Pending
+            || reservation.Status == ReservationStatus.Confirmed))
             throw new ForbiddenChangeStatusException(reservation.Status.ToString(),
-                ReservationStatus.Confirmed.ToString());
+                ReservationStatus.Cancelled.ToString());
 
-        await repository.ConfirmReservationAsync(request.Id, cancellationToken);
+        await repository.CancelReservationAsync(request.Id, cancellationToken);
     }
 }

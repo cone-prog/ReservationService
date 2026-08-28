@@ -1,15 +1,15 @@
 using FluentValidation.TestHelper;
-using ReservationService.Endpoints.Reservation.Confirm;
+using ReservationService.Endpoints.Reservation.Cancel;
 
 namespace ReservationService.UnitTests.Reservations;
 
-public class ConfirmReservationRequestValidatorTests
+public class CancelReservationRequestValidatorTests
 {
     [Fact]
     public async Task Validate_WhenIdEmpty_ShouldHaveValidationError()
     {
-        var request = new ConfirmReservationRequest(Guid.Empty);
-        var validator = new ConfirmReservationRequestValidator();
+        var request = new CancelReservationRequest(Guid.Empty);
+        var validator = new CancelReservationRequestValidator();
 
         var validationResult = await validator.TestValidateAsync(
             objectToTest: request,
@@ -21,10 +21,10 @@ public class ConfirmReservationRequestValidatorTests
     [Fact]
     public async Task Validate_WhenRequestValid_ShouldNotHaveValidationError()
     {
-        var request = new ConfirmReservationRequest(
+        var request = new CancelReservationRequest(
             Guid.Parse("550e8400-e29b-41d4-a716-446655440000")
         );
-        var validator = new ConfirmReservationRequestValidator();
+        var validator = new CancelReservationRequestValidator();
 
         var validationResult = await validator.TestValidateAsync(
             objectToTest: request,

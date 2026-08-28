@@ -1,3 +1,4 @@
+using ReservationService.Endpoints.Reservation.Cancel;
 using ReservationService.Endpoints.Reservation.Confirm;
 using ReservationService.Endpoints.Reservation.Create;
 using ReservationService.Endpoints.Workspace.Get;
@@ -23,6 +24,7 @@ public static class DependencyInjection
         services.AddScoped<GetAvailableSlotsHandler>();
         services.AddScoped<CreateReservationHandler>();
         services.AddScoped<ConfirmReservationHandler>();
+        services.AddScoped<CancelReservationHandler>();
         services.AddExceptionHandler<ValidationExceptionHandler>();
         services.AddExceptionHandler<GlobalExceptionHandler>();
         var assembly = typeof(Program).Assembly;

@@ -1,23 +1,23 @@
 using FluentValidation;
 using FluentValidation.Results;
 using Moq;
-using ReservationService.Endpoints.Reservation.Confirm;
+using ReservationService.Endpoints.Reservation.Cancel;
 using ReservationService.Exceptions;
 using ReservationService.Infrastructure.Repositories;
 using ReservationService.Models;
 
 namespace ReservationService.UnitTests.Reservations;
 
-public class ConfirmReservationHandlerTests
+public class CancelReservationHandlerTests
 {
     [Fact]
-    public async Task ConfirmReservationAsync_WhenRequestInvalid_ShouldThrowValidationException()
+    public async Task CancelReservationAsync_WhenRequestInvalid_ShouldThrowValidationException()
     {
-        var request = new ConfirmReservationRequest(
+        var request = new CancelReservationRequest(
             Guid.Empty);
 
         var reservationRepository = new Mock<IReservationRepository>();
-        var validator = new Mock<IValidator<ConfirmReservationRequest>>();
+        var validator = new Mock<IValidator<CancelReservationRequest>>();
 
         validator
             .Setup(v => v.ValidateAsync(
@@ -28,12 +28,12 @@ public class ConfirmReservationHandlerTests
                 [new ValidationFailure("", "")]
             ));
 
-        var handler = new ConfirmReservationHandler(
+        var handler = new CancelReservationHandler(
             reservationRepository.Object,
             validator.Object);
 
         await Assert.ThrowsAsync<ValidationException>(
-            () => handler.ConfirmReservationAsync(
+            () => handler.CancelReservationAsync(
                 request,
                 CancellationToken.None
             )
@@ -44,20 +44,20 @@ public class ConfirmReservationHandlerTests
                 It.IsAny<CancellationToken>()
         ), Times.Never);
 
-        reservationRepository.Verify(r => r.ConfirmReservationAsync(
+        reservationRepository.Verify(r => r.CancelReservationAsync(
             request.Id,
             It.IsAny<CancellationToken>()
         ), Times.Never);
     }
 
     [Fact]
-    public async Task ConfirmReservationAsync_WhenReservationDoesNotExist_ShouldThrowNotFoundException()
+    public async Task CancelReservationAsync_WhenReservationDoesNotExist_ShouldThrowNotFoundException()
     {
-        var request = new ConfirmReservationRequest(
+        var request = new CancelReservationRequest(
             Guid.Parse("550e8400-e29b-41d4-a716-446655440000"));
 
         var reservationRepository = new Mock<IReservationRepository>();
-        var validator = new Mock<IValidator<ConfirmReservationRequest>>();
+        var validator = new Mock<IValidator<CancelReservationRequest>>();
 
         validator
             .Setup(v => v.ValidateAsync(
@@ -72,13 +72,13 @@ public class ConfirmReservationHandlerTests
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync((Reservation?)null);
 
-        var handler = new ConfirmReservationHandler(
+        var handler = new CancelReservationHandler(
             reservationRepository.Object,
             validator.Object);
 
 
         await Assert.ThrowsAsync<NotFoundException>(
-            () => handler.ConfirmReservationAsync(
+            () => handler.CancelReservationAsync(
                 request,
                 CancellationToken.None
             )
@@ -89,20 +89,19 @@ public class ConfirmReservationHandlerTests
                 It.IsAny<CancellationToken>()
         ), Times.Once);
 
-        reservationRepository.Verify(r => r.ConfirmReservationAsync(
+        reservationRepository.Verify(r => r.CancelReservationAsync(
             request.Id,
             It.IsAny<CancellationToken>()
         ), Times.Never);
     }
 
     [Theory]
-    [InlineData(ReservationStatus.Confirmed)]
     [InlineData(ReservationStatus.Expired)]
     [InlineData(ReservationStatus.Cancelled)]
-    public async Task ConfirmReservationAsync_WhenReservationStatusIsNotPending_ShouldThrowForbiddenChangeStatusException(
+    public async Task CancelReservationAsync_WhenReservationStatusIsNotPendingOrConfirmed_ShouldThrowForbiddenChangeStatusException(
         ReservationStatus status)
     {
-        var request = new ConfirmReservationRequest(
+        var request = new CancelReservationRequest(
             Guid.Parse("550e8400-e29b-41d4-a716-446655440000"));
 
         var time = DateTime.UtcNow;
@@ -121,7 +120,7 @@ public class ConfirmReservationHandlerTests
         };
 
         var reservationRepository = new Mock<IReservationRepository>();
-        var validator = new Mock<IValidator<ConfirmReservationRequest>>();
+        var validator = new Mock<IValidator<CancelReservationRequest>>();
 
         validator
             .Setup(v => v.ValidateAsync(
@@ -136,12 +135,12 @@ public class ConfirmReservationHandlerTests
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(reservation);
 
-        var handler = new ConfirmReservationHandler(
+        var handler = new CancelReservationHandler(
             reservationRepository.Object,
             validator.Object);
 
         await Assert.ThrowsAsync<ForbiddenChangeStatusException>(
-            () => handler.ConfirmReservationAsync(
+            () => handler.CancelReservationAsync(
                 request,
                 CancellationToken.None
             )
@@ -152,16 +151,19 @@ public class ConfirmReservationHandlerTests
                 It.IsAny<CancellationToken>()
         ), Times.Once);
 
-        reservationRepository.Verify(r => r.ConfirmReservationAsync(
+        reservationRepository.Verify(r => r.CancelReservationAsync(
             request.Id,
             It.IsAny<CancellationToken>()
         ), Times.Never);
     }
 
-    [Fact]
-    public async Task ConfirmReservationAsync_WhenReservationIsPending_ShouldConfirmReservation()
+    [Theory]
+    [InlineData(ReservationStatus.Pending)]
+    [InlineData(ReservationStatus.Confirmed)]
+    public async Task CancelReservationAsync_WhenReservationIsPendingOrConfirmed_ShouldCancelReservation(
+        ReservationStatus status)
     {
-        var request = new ConfirmReservationRequest(
+        var request = new CancelReservationRequest(
             Guid.Parse("550e8400-e29b-41d4-a716-446655440000"));
 
         var time = DateTime.UtcNow;
@@ -175,12 +177,12 @@ public class ConfirmReservationHandlerTests
             UserId = Guid.Parse("550e8400-e29b-41d4-a716-446655440002"),
             StartAt = start,
             EndAt = end,
-            Status = ReservationStatus.Pending,
+            Status = status,
             CreatedAt = time,
         };
 
         var reservationRepository = new Mock<IReservationRepository>();
-        var validator = new Mock<IValidator<ConfirmReservationRequest>>();
+        var validator = new Mock<IValidator<CancelReservationRequest>>();
 
         validator
             .Setup(v => v.ValidateAsync(
@@ -195,11 +197,11 @@ public class ConfirmReservationHandlerTests
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(reservation);
 
-        var handler = new ConfirmReservationHandler(
+        var handler = new CancelReservationHandler(
             reservationRepository.Object,
             validator.Object);
 
-        await handler.ConfirmReservationAsync(request,
+        await handler.CancelReservationAsync(request,
             CancellationToken.None);
 
         reservationRepository.Verify(r => r.GetByIdAsync(
@@ -207,9 +209,10 @@ public class ConfirmReservationHandlerTests
                 It.IsAny<CancellationToken>()
         ), Times.Once);
 
-        reservationRepository.Verify(r => r.ConfirmReservationAsync(
+        reservationRepository.Verify(r => r.CancelReservationAsync(
             request.Id,
             It.IsAny<CancellationToken>()
         ), Times.Once);
     }
 }
+
