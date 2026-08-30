@@ -116,4 +116,24 @@ public class ReservationRepository(DapperContext dbContext) : IReservationReposi
             cancellationToken: cancellationToken
         ));
     }
+
+    public async Task ExpirePendingReservationsAsync(CancellationToken cancellationToken)
+    {
+        var query = """
+            UPDATE Reservation
+                SET Status = 'Expired'
+                WHERE Status = 'Pending'
+                AND CreatedAt < @expiresBefore
+        """;
+
+        using var dbConnection = dbContext.CreateConnection();
+        await dbConnection.ExecuteAsync(new CommandDefinition(
+            commandText: query,
+            parameters: new
+            {
+                expiresBefore = DateTime.UtcNow.AddMinutes(-10)
+            },
+            cancellationToken: cancellationToken
+        ));
+    }
 }

@@ -19,4 +19,7 @@ public interface IReservationRepository
 
     Task CancelReservationAsync(Guid id,
         CancellationToken cancellationToken);
+
+    Task ExpirePendingReservationsAsync(
+        CancellationToken cancellationToken);
 }

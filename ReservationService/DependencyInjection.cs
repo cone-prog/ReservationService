@@ -1,3 +1,4 @@
+using ReservationService.BackgroundServices;
 using ReservationService.Endpoints.Reservation.Cancel;
 using ReservationService.Endpoints.Reservation.Confirm;
 using ReservationService.Endpoints.Reservation.Create;
@@ -27,6 +28,7 @@ public static class DependencyInjection
         services.AddScoped<CancelReservationHandler>();
         services.AddExceptionHandler<ValidationExceptionHandler>();
         services.AddExceptionHandler<GlobalExceptionHandler>();
+        services.AddHostedService<ExpireReservationService>();
         var assembly = typeof(Program).Assembly;
         TypeAdapterConfig.GlobalSettings.Scan(assembly);
         services.AddValidatorsFromAssembly(assembly);
