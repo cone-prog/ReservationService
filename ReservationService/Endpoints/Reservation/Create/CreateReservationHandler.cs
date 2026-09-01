@@ -24,15 +24,12 @@ public class CreateReservationHandler(
         if (!workspace.IsActive)
             throw new WorkspaceNotActiveException(workspace.Name);
 
-        var StartAtUtc = dto.StartAt.UtcDateTime;
-        var EndAtUtc = dto.EndAt.UtcDateTime;
-
-        if (!await reservationRepository.IsSlotAvailableAsync(dto.WorkspaceId, StartAtUtc,
-            EndAtUtc, cancellationToken))
-            throw new SlotNotAvailableException(workspace.Name, StartAtUtc, EndAtUtc);
-
         var result = await reservationRepository.CreateReservationAsync(dto,
             cancellationToken);
+
+        if (!result)
+            throw new SlotNotAvailableException(workspace.Name, request.Dto.StartAt.UtcDateTime,
+                request.Dto.EndAt.UtcDateTime);
 
         return result;
     }

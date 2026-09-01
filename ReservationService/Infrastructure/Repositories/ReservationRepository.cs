@@ -25,15 +25,21 @@ public class ReservationRepository(DapperContext dbContext) : IReservationReposi
         return result;
     }
 
-    public async Task<bool> IsSlotAvailableAsync(Guid workspaceId, DateTime start,
-        DateTime end, CancellationToken cancellationToken)
+    public async Task<bool> CreateReservationAsync(CreateReservationDto dto,
+        CancellationToken cancellationToken)
     {
         var activeReservationStatuses = new[]
             {
                 ReservationStatus.Confirmed.ToString(),
                 ReservationStatus.Pending.ToString()
             };
-        var query = """
+        var queryLock = """
+            SELECT Id FROM Workspace
+            WHERE Id = @id
+            FOR UPDATE
+        """;
+
+        var queryCheck = """
             SELECT NOT EXISTS(
             SELECT 1
             FROM Reservation
@@ -42,44 +48,64 @@ public class ReservationRepository(DapperContext dbContext) : IReservationReposi
             AND @endAt > StartAt AND EndAt > @startAt 
             )
         """;
-        using var dbConnection = dbContext.CreateConnection();
-        return await dbConnection.ExecuteScalarAsync<bool>(new CommandDefinition(
-            commandText: query,
-            parameters: new
-            {
-                workspaceId,
-                activeReservationStatuses,
-                startAt = start,
-                endAt = end
-            },
-            cancellationToken: cancellationToken
-        ));
-    }
 
-    public async Task<bool> CreateReservationAsync(CreateReservationDto dto,
-        CancellationToken cancellationToken)
-    {
-        var query = """
+        var queryCreate = """
             INSERT INTO Reservation (Id, WorkspaceId, UserId, StartAt, EndAt, Status, CreatedAt)
             VALUES (@id, @workspaceId, @userId, @startAt, @endAt, @status, @createdAt)
         """;
 
         using var dbConnection = dbContext.CreateConnection();
+        await dbConnection.OpenAsync(cancellationToken);
+        using var transaction = await dbConnection.BeginTransactionAsync();
+
+        await dbConnection.QuerySingleAsync<Guid>(new CommandDefinition(
+            commandText: queryLock,
+            parameters: new { id = dto.WorkspaceId },
+            cancellationToken: cancellationToken,
+            transaction: transaction
+        ));
+
+        var isAvailable = await dbConnection.ExecuteScalarAsync<bool>(new CommandDefinition(
+            commandText: queryCheck,
+            parameters: new
+            {
+                dto.WorkspaceId,
+                activeReservationStatuses,
+                startAt = dto.StartAt.UtcDateTime,
+                endAt = dto.EndAt.UtcDateTime
+            },
+            cancellationToken: cancellationToken,
+            transaction: transaction
+        ));
+
+        if (!isAvailable)
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            return false;
+        }
+
         var result = await dbConnection.ExecuteAsync(new CommandDefinition(
-            commandText: query,
+            commandText: queryCreate,
             parameters: new
             {
                 id = Guid.NewGuid(),
                 dto.WorkspaceId,
                 dto.UserId,
                 startAt = dto.StartAt.UtcDateTime,
-                EndAt = dto.EndAt.UtcDateTime,
+                endAt = dto.EndAt.UtcDateTime,
                 status = ReservationStatus.Pending.ToString(),
                 createdAt = DateTime.UtcNow
             },
-            cancellationToken: cancellationToken
+            cancellationToken: cancellationToken,
+            transaction: transaction
         ));
-        return result > 0;
+
+        if (result != 1)
+            throw new InvalidOperationException(
+            "Reservation was not created.");
+
+        await transaction.CommitAsync(cancellationToken);
+        return true;
     }
 
     public async Task ConfirmReservationAsync(Guid id,

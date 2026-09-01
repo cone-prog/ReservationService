@@ -7,5 +7,5 @@ public class DapperContext(IConfiguration configuration)
 {
     private readonly string connectionString = configuration.GetConnectionString("PgConnection")!;
 
-    public IDbConnection CreateConnection() => new NpgsqlConnection(connectionString);
+    public NpgsqlConnection CreateConnection() => new NpgsqlConnection(connectionString);
 }

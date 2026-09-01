@@ -50,12 +50,6 @@ public class CreateReservationHandlerTests
             It.IsAny<CancellationToken>()
         ), Times.Never);
 
-        reservationRepository.Verify(r => r.IsSlotAvailableAsync(
-                request.Dto.WorkspaceId,
-                request.Dto.StartAt.UtcDateTime,
-                request.Dto.EndAt.UtcDateTime,
-                It.IsAny<CancellationToken>()
-        ), Times.Never);
 
         reservationRepository.Verify(r => r.CreateReservationAsync(
             request.Dto,
@@ -106,13 +100,6 @@ public class CreateReservationHandlerTests
             request.Dto.WorkspaceId,
             It.IsAny<CancellationToken>()
         ), Times.Once);
-
-        reservationRepository.Verify(r => r.IsSlotAvailableAsync(
-                request.Dto.WorkspaceId,
-                request.Dto.StartAt.UtcDateTime,
-                request.Dto.EndAt.UtcDateTime,
-                It.IsAny<CancellationToken>()
-        ), Times.Never);
 
         reservationRepository.Verify(r => r.CreateReservationAsync(
             request.Dto,
@@ -174,13 +161,6 @@ public class CreateReservationHandlerTests
             It.IsAny<CancellationToken>()
         ), Times.Once);
 
-        reservationRepository.Verify(r => r.IsSlotAvailableAsync(
-                workspace.Id,
-                request.Dto.StartAt.UtcDateTime,
-                request.Dto.EndAt.UtcDateTime,
-                It.IsAny<CancellationToken>()
-        ), Times.Never);
-
         reservationRepository.Verify(r => r.CreateReservationAsync(
             request.Dto,
             It.IsAny<CancellationToken>()
@@ -229,11 +209,10 @@ public class CreateReservationHandlerTests
             .ReturnsAsync(workspace);
 
         reservationRepository
-            .Setup(r => r.IsSlotAvailableAsync(
-                workspace.Id,
-                request.Dto.StartAt.UtcDateTime,
-                request.Dto.EndAt.UtcDateTime,
-                It.IsAny<CancellationToken>()))
+            .Setup(r => r.CreateReservationAsync(
+                request.Dto,
+                It.IsAny<CancellationToken>()
+            ))
             .ReturnsAsync(false);
 
         var handler = new CreateReservationHandler(
@@ -249,17 +228,10 @@ public class CreateReservationHandlerTests
             It.IsAny<CancellationToken>()
         ), Times.Once);
 
-        reservationRepository.Verify(r => r.IsSlotAvailableAsync(
-                workspace.Id,
-                request.Dto.StartAt.UtcDateTime,
-                request.Dto.EndAt.UtcDateTime,
-                It.IsAny<CancellationToken>()
-        ), Times.Once);
-
         reservationRepository.Verify(r => r.CreateReservationAsync(
             request.Dto,
             It.IsAny<CancellationToken>()
-        ), Times.Never);
+        ), Times.Once);
     }
 
     [Fact]
@@ -306,11 +278,10 @@ public class CreateReservationHandlerTests
             .ReturnsAsync(workspace);
 
         reservationRepository
-            .Setup(r => r.IsSlotAvailableAsync(
-                workspace.Id,
-                request.Dto.StartAt.UtcDateTime,
-                request.Dto.EndAt.UtcDateTime,
-                It.IsAny<CancellationToken>()))
+            .Setup(r => r.CreateReservationAsync(
+                request.Dto,
+                It.IsAny<CancellationToken>()
+            ))
             .ReturnsAsync(true);
 
         reservationRepository
@@ -332,13 +303,6 @@ public class CreateReservationHandlerTests
         workspaceRepository.Verify(w => w.GetByIdAsync(
             request.Dto.WorkspaceId,
             It.IsAny<CancellationToken>()
-        ), Times.Once);
-
-        reservationRepository.Verify(r => r.IsSlotAvailableAsync(
-                workspace.Id,
-                request.Dto.StartAt.UtcDateTime,
-                request.Dto.EndAt.UtcDateTime,
-                It.IsAny<CancellationToken>()
         ), Times.Once);
 
         reservationRepository.Verify(r => r.CreateReservationAsync(
