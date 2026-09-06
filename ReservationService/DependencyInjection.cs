@@ -20,6 +20,10 @@ public static class DependencyInjection
         services.AddScoped<IWorkspaceRepository, WorkspaceRepository>();
         services.AddScoped<IReservationRepository, ReservationRepository>();
         services.AddCarter();
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = configuration.GetConnectionString("RedisConnection");
+        });
         services.AddScoped<GetWorkspacesHandler>();
         services.AddScoped<GetWorkspaceByIdHandler>();
         services.AddScoped<GetAvailableSlotsHandler>();

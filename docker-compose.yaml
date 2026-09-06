@@ -7,3 +7,10 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_DB: Reservation-db
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+  reservation-cache-redis:
+    image: redis:8
+    ports:
+      - "7020:6379"
+
+     

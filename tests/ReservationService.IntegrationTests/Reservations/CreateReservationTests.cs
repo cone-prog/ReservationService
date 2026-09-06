@@ -258,6 +258,5 @@ public class CreateReservationTests(DatabaseFixture databaseFixture)
                 }
             ));
         Assert.Equal(1, count);
-
     }
 }
