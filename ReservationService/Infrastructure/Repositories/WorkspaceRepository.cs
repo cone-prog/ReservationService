@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Caching.Distributed;
 using ReservationService.Endpoints.Workspace.Get;
 using ReservationService.Endpoints.Workspace.GetAvailabilitySlots;
 using ReservationService.Infrastructure.Context;
@@ -54,7 +55,6 @@ public class WorkspaceRepository(DapperContext dbContext) : IWorkspaceRepository
     public async Task<List<Slot>> GetAvailabilitySlotsAsync(Guid id,
         DateOnly date, CancellationToken cancellationToken)
     {
-
         var query = """
             SELECT StartAt, EndAt
             FROM Reservation
@@ -78,6 +78,7 @@ public class WorkspaceRepository(DapperContext dbContext) : IWorkspaceRepository
             },
             cancellationToken: cancellationToken
         ));
+
         return slots.ToList();
     }
 

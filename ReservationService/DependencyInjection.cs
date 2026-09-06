@@ -18,6 +18,7 @@ public static class DependencyInjection
     {
         services.AddSingleton<DapperContext>();
         services.AddScoped<IWorkspaceRepository, WorkspaceRepository>();
+        services.Decorate<IWorkspaceRepository, RedisWorkspaceCacheRepository>();
         services.AddScoped<IReservationRepository, ReservationRepository>();
         services.AddCarter();
         services.AddStackExchangeRedisCache(options =>
