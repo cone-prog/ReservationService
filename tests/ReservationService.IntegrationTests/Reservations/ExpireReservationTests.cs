@@ -27,10 +27,10 @@ public class ExpireReservationTests(DatabaseFixture databaseFixture)
         var reservation = new Reservation
         {
             Id = id,
-            WorkspaceId = Guid.Parse("00000000-0000-0000-0000-000000000009"),
+            WorkspaceId = Guid.Parse("00000000-0000-0000-0000-000000000006"),
             UserId = Guid.Parse("00000000-0000-0000-0000-000000000021"),
-            StartAt = time.AddHours(1),
-            EndAt = time.AddHours(2),
+            StartAt = time.AddHours(6),
+            EndAt = time.AddHours(7),
             Status = ReservationStatus.Pending,
             CreatedAt = time.AddMinutes(-11)
         };
@@ -100,10 +100,10 @@ public class ExpireReservationTests(DatabaseFixture databaseFixture)
         var reservation = new Reservation
         {
             Id = id,
-            WorkspaceId = Guid.Parse("00000000-0000-0000-0000-000000000009"),
+            WorkspaceId = Guid.Parse("00000000-0000-0000-0000-000000000006"),
             UserId = Guid.Parse("00000000-0000-0000-0000-000000000021"),
-            StartAt = time.AddHours(1),
-            EndAt = time.AddHours(2),
+            StartAt = time.AddHours(4),
+            EndAt = time.AddHours(5),
             Status = ReservationStatus.Pending,
             CreatedAt = time.AddMinutes(-5)
         };
@@ -173,10 +173,10 @@ public class ExpireReservationTests(DatabaseFixture databaseFixture)
         var reservation = new Reservation
         {
             Id = id,
-            WorkspaceId = Guid.Parse("00000000-0000-0000-0000-000000000009"),
+            WorkspaceId = Guid.Parse("00000000-0000-0000-0000-000000000006"),
             UserId = Guid.Parse("00000000-0000-0000-0000-000000000021"),
-            StartAt = time.AddHours(1),
-            EndAt = time.AddHours(2),
+            StartAt = time.AddHours(9),
+            EndAt = time.AddHours(10),
             Status = ReservationStatus.Confirmed,
             CreatedAt = time.AddMinutes(-11)
         };

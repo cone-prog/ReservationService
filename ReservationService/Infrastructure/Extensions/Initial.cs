@@ -30,6 +30,7 @@ public static class Initial
             cancellationToken: cancellationToken));
 
         var reservationQuery = """
+                CREATE EXTENSION IF NOT EXISTS btree_gist;
                 CREATE TABLE IF NOT EXISTS Reservation (
                 Id UUID NOT NULL PRIMARY KEY,
                 WorkspaceId UUID NOT NULL,
@@ -38,8 +39,10 @@ public static class Initial
                 EndAt TIMESTAMPTZ NOT NULL,
                 Status TEXT NOT NULL,
                 CreatedAt TIMESTAMPTZ NOT NULL,
-                FOREIGN KEY (WorkspaceId) REFERENCES Workspace (Id)
-                )
+                FOREIGN KEY (WorkspaceId) REFERENCES Workspace (Id),
+                EXCLUDE USING GIST (WorkspaceId WITH=, tstzrange(StartAt, EndAt, '[)') WITH &&)
+                WHERE (Status IN ('Pending', 'Confirmed'))
+                );
             """;
 
         await dbConnection.ExecuteAsync(new CommandDefinition(

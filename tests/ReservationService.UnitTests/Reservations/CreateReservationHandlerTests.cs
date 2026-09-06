@@ -284,12 +284,6 @@ public class CreateReservationHandlerTests
             ))
             .ReturnsAsync(true);
 
-        reservationRepository
-            .Setup(r => r.CreateReservationAsync(
-                request.Dto,
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
-
         var handler = new CreateReservationHandler(
             workspaceRepository.Object,
             reservationRepository.Object,

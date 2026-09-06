@@ -54,9 +54,11 @@ public class ReservationRepository(DapperContext dbContext) : IReservationReposi
             VALUES (@id, @workspaceId, @userId, @startAt, @endAt, @status, @createdAt)
         """;
 
-        using var dbConnection = dbContext.CreateConnection();
+        await using var dbConnection = dbContext.CreateConnection();
         await dbConnection.OpenAsync(cancellationToken);
-        using var transaction = await dbConnection.BeginTransactionAsync();
+        using var transaction = await dbConnection.BeginTransactionAsync(
+            cancellationToken
+        );
 
         await dbConnection.QuerySingleAsync<Guid>(new CommandDefinition(
             commandText: queryLock,

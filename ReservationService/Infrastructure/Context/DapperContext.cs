@@ -1,4 +1,3 @@
-using System.Data;
 using Npgsql;
 
 namespace ReservationService.Infrastructure.Context;

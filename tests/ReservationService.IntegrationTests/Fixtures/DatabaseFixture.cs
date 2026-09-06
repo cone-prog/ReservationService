@@ -19,6 +19,7 @@ public class DatabaseFixture : IAsyncLifetime
     public async ValueTask InitializeAsync()
     {
         await postgreSqlContainer.StartAsync();
+
     }
 
     public async ValueTask DisposeAsync()
