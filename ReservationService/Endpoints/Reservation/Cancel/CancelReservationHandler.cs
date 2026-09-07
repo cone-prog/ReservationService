@@ -26,6 +26,6 @@ public class CancelReservationHandler(IReservationRepository repository,
             throw new ForbiddenChangeStatusException(reservation.Status.ToString(),
                 ReservationStatus.Cancelled.ToString());
 
-        await repository.CancelReservationAsync(request.Id, cancellationToken);
+        await repository.CancelReservationAsync(reservation, cancellationToken);
     }
 }

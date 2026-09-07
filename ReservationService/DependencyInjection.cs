@@ -20,6 +20,7 @@ public static class DependencyInjection
         services.AddScoped<IWorkspaceRepository, WorkspaceRepository>();
         services.Decorate<IWorkspaceRepository, RedisWorkspaceCacheRepository>();
         services.AddScoped<IReservationRepository, ReservationRepository>();
+        services.Decorate<IReservationRepository, RedisReservationCacheRepository>();
         services.AddCarter();
         services.AddStackExchangeRedisCache(options =>
         {

@@ -128,7 +128,7 @@ public class ReservationRepository(DapperContext dbContext) : IReservationReposi
         ));
     }
 
-    public async Task CancelReservationAsync(Guid id, CancellationToken cancellationToken)
+    public async Task CancelReservationAsync(Reservation reservation, CancellationToken cancellationToken)
     {
         var query = """
             UPDATE Reservation SET Status = 'Cancelled' WHERE Id = @id
@@ -139,23 +139,24 @@ public class ReservationRepository(DapperContext dbContext) : IReservationReposi
             commandText: query,
             parameters: new
             {
-                id,
+                id = reservation.Id,
             },
             cancellationToken: cancellationToken
         ));
     }
 
-    public async Task ExpirePendingReservationsAsync(CancellationToken cancellationToken)
+    public async Task<List<Reservation>> ExpirePendingReservationsAsync(CancellationToken cancellationToken)
     {
         var query = """
             UPDATE Reservation
                 SET Status = 'Expired'
                 WHERE Status = 'Pending'
                 AND CreatedAt < @expiresBefore
+            RETURNING *
         """;
 
         using var dbConnection = dbContext.CreateConnection();
-        await dbConnection.ExecuteAsync(new CommandDefinition(
+        var result = await dbConnection.QueryAsync<Reservation>(new CommandDefinition(
             commandText: query,
             parameters: new
             {
@@ -163,5 +164,7 @@ public class ReservationRepository(DapperContext dbContext) : IReservationReposi
             },
             cancellationToken: cancellationToken
         ));
+
+        return result.ToList();
     }
 }

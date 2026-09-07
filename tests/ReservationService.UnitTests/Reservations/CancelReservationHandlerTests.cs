@@ -45,7 +45,7 @@ public class CancelReservationHandlerTests
         ), Times.Never);
 
         reservationRepository.Verify(r => r.CancelReservationAsync(
-            request.Id,
+            It.IsAny<Reservation>(),
             It.IsAny<CancellationToken>()
         ), Times.Never);
     }
@@ -90,7 +90,7 @@ public class CancelReservationHandlerTests
         ), Times.Once);
 
         reservationRepository.Verify(r => r.CancelReservationAsync(
-            request.Id,
+            It.IsAny<Reservation>(),
             It.IsAny<CancellationToken>()
         ), Times.Never);
     }
@@ -152,7 +152,7 @@ public class CancelReservationHandlerTests
         ), Times.Once);
 
         reservationRepository.Verify(r => r.CancelReservationAsync(
-            request.Id,
+            reservation,
             It.IsAny<CancellationToken>()
         ), Times.Never);
     }
@@ -210,7 +210,7 @@ public class CancelReservationHandlerTests
         ), Times.Once);
 
         reservationRepository.Verify(r => r.CancelReservationAsync(
-            request.Id,
+            reservation,
             It.IsAny<CancellationToken>()
         ), Times.Once);
     }
