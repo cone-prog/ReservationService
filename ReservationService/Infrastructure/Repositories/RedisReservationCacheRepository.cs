@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Caching.Distributed;
 using ReservationService.Endpoints.Reservation.Create;
 using ReservationService.Models;
-using StackExchange.Redis;
 
 namespace ReservationService.Infrastructure.Repositories;
 
