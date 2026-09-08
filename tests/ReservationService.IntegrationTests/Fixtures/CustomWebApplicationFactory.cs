@@ -3,14 +3,18 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace ReservationService.IntegrationTests.Fixtures;
 
-public class CustomWebApplicationFactory(string connectionString)
-        : WebApplicationFactory<Program>
+public class CustomWebApplicationFactory(string connectionStringDb,
+    string connectionStringRedis)
+    : WebApplicationFactory<Program>
 {
-    private readonly string connectionString = connectionString;
+    private readonly string connectionStringDb = connectionStringDb;
+    private readonly string connectionStringRedis = connectionStringRedis;
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseSetting("ConnectionStrings:PgConnection",
-            connectionString);
+            connectionStringDb);
+        builder.UseSetting("ConnectionStrings:RedisConnection",
+            connectionStringRedis);
     }
 }

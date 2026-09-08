@@ -6,14 +6,15 @@ using ReservationService.Models;
 
 namespace ReservationService.IntegrationTests.Reservations;
 
-public class ExpireReservationTests(DatabaseFixture databaseFixture)
-    : IClassFixture<DatabaseFixture>
+public class ExpireReservationTests(DatabaseAndRedisFixture databaseAndRedisFixture)
+    : IClassFixture<DatabaseAndRedisFixture>
 {
     [Fact]
     public async Task AutoExpireReservationService_WhenReservationIsOlderThanTenMinutes_ShouldSetStatusExpired()
     {
         using var factory = new CustomWebApplicationFactory(
-            databaseFixture.ConnectionString);
+            databaseAndRedisFixture.ConnectionStringDb,
+            databaseAndRedisFixture.ConnectionStringRedis);
 
         await using var scope = factory.Services.CreateAsyncScope();
 
@@ -86,7 +87,8 @@ public class ExpireReservationTests(DatabaseFixture databaseFixture)
     public async Task AutoExpireReservationService_WhenReservationCreatedLessThanTenMinutesAgo_ShouldStatusRemainPending()
     {
         using var factory = new CustomWebApplicationFactory(
-            databaseFixture.ConnectionString);
+            databaseAndRedisFixture.ConnectionStringDb,
+            databaseAndRedisFixture.ConnectionStringRedis);
 
         await using var scope = factory.Services.CreateAsyncScope();
 
@@ -159,7 +161,8 @@ public class ExpireReservationTests(DatabaseFixture databaseFixture)
     public async Task AutoExpireReservationService_WhenUserConfirmedReservation_ShouldDontSetStatusExpire()
     {
         using var factory = new CustomWebApplicationFactory(
-            databaseFixture.ConnectionString);
+            databaseAndRedisFixture.ConnectionStringDb,
+            databaseAndRedisFixture.ConnectionStringRedis);
 
         await using var scope = factory.Services.CreateAsyncScope();
 

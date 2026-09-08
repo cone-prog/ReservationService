@@ -9,14 +9,15 @@ using ReservationService.Models;
 
 namespace ReservationService.IntegrationTests.Reservations;
 
-public class CreateReservationTests(DatabaseFixture databaseFixture)
-    : IClassFixture<DatabaseFixture>
+public class CreateReservationTests(DatabaseAndRedisFixture databaseAndRedisFixture)
+    : IClassFixture<DatabaseAndRedisFixture>
 {
     [Fact]
     public async Task CreateReservation_WhenValid_ShouldSaveReservation()
     {
         using var factory = new CustomWebApplicationFactory(
-            databaseFixture.ConnectionString);
+            databaseAndRedisFixture.ConnectionStringDb,
+            databaseAndRedisFixture.ConnectionStringRedis);
 
         await using var scope = factory.Services.CreateAsyncScope();
 
@@ -69,7 +70,8 @@ public class CreateReservationTests(DatabaseFixture databaseFixture)
     public async Task CreateReservation_WhenConcurrentRequests_ShouldCreateOnlyOneReservation()
     {
         using var factory = new CustomWebApplicationFactory(
-            databaseFixture.ConnectionString);
+            databaseAndRedisFixture.ConnectionStringDb,
+            databaseAndRedisFixture.ConnectionStringRedis);
 
         var time = DateTimeOffset.UtcNow;
 
@@ -159,7 +161,8 @@ public class CreateReservationTests(DatabaseFixture databaseFixture)
     public async Task ReservationExclusionConstraint_WhenConcurrentInsertsOverlap_ShouldAllowOnlyOneReservation()
     {
         using var factory = new CustomWebApplicationFactory(
-            databaseFixture.ConnectionString);
+            databaseAndRedisFixture.ConnectionStringDb,
+            databaseAndRedisFixture.ConnectionStringRedis);
 
         var time = DateTimeOffset.UtcNow;
 
