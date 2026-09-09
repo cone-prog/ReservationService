@@ -74,8 +74,8 @@ public class CreateReservationWithCache(DatabaseAndRedisFixture fixture)
                 oldReservation.UserId,
                 oldReservation.StartAt,
                 oldReservation.EndAt,
-                status = ReservationStatus.Confirmed.ToString(),
-                createdAt = oldReservation.StartAt.AddHours(-1),
+                status = oldReservation.Status.ToString(),
+                oldReservation.CreatedAt,
             }
         ));
 
