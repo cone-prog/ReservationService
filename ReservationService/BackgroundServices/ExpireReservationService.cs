@@ -17,6 +17,7 @@ public class ExpireReservationService(
             {
                 await repository.ExpirePendingReservationsAsync(stoppingToken);
             }
+
             catch (Exception ex)
             {
                 if (!stoppingToken.IsCancellationRequested)

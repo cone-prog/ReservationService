@@ -61,7 +61,6 @@ public class ExpireReservationTests(DatabaseAndRedisFixture databaseAndRedisFixt
             WHERE Id = @id
         """;
 
-
         Reservation? result = null;
         var timeoutAt = DateTime.UtcNow.AddSeconds(10);
 
