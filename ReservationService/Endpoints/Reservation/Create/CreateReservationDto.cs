@@ -9,6 +9,6 @@ public record CreateReservationDto(
         "Время начала. Формат: yyyy-MM-ddTHH:mm:ssZ или yyyy-MM-ddTHH:mm:ss±HH:mm")]
     DateTimeOffset StartAt,
     [property: Description(
-        "Время начала. Формат: yyyy-MM-ddTHH:mm:ssZ или yyyy-MM-ddTHH:mm:ss±HH:mm")]
+        "Время окончания. Формат: yyyy-MM-ddTHH:mm:ssZ или yyyy-MM-ddTHH:mm:ss±HH:mm")]
     DateTimeOffset EndAt
 );
