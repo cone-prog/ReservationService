@@ -1,4 +1,5 @@
 using ReservationService.Endpoints.Reservation.Create;
+using ReservationService.Endpoints.Results;
 using ReservationService.Models;
 
 namespace ReservationService.Infrastructure.Repositories;
@@ -11,7 +12,7 @@ public interface IReservationRepository
     Task<bool> CreateReservationAsync(CreateReservationDto dto,
         CancellationToken cancellationToken);
 
-    Task ConfirmReservationAsync(Guid id,
+    Task<ChangeStatusResult> ConfirmReservationAsync(Guid id,
         CancellationToken cancellationToken);
 
     Task CancelReservationAsync(Reservation reservation,

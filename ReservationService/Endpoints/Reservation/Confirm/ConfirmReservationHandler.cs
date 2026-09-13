@@ -1,3 +1,4 @@
+using ReservationService.Endpoints.Results;
 using ReservationService.Exceptions;
 using ReservationService.Models;
 
@@ -16,16 +17,14 @@ public class ConfirmReservationHandler(
         if (!validationResult.IsValid)
             throw new ValidationException(validationResult.Errors);
 
-        var reservation = await repository.GetByIdAsync(request.Id,
+        var result = await repository.ConfirmReservationAsync(request.Id,
             cancellationToken);
 
-        if (reservation is null)
+        if (result.ResultType == ChangeStatusResultType.NotFound)
             throw new NotFoundException("Бронирование", request.Id);
 
-        if (reservation.Status != ReservationStatus.Pending)
-            throw new ForbiddenChangeStatusException(reservation.Status.ToString(),
+        if (result.ResultType == ChangeStatusResultType.InvalidStatusChange)
+            throw new ForbiddenChangeStatusException(result.Status!.Value.ToString(),
                 ReservationStatus.Confirmed.ToString());
-
-        await repository.ConfirmReservationAsync(request.Id, cancellationToken);
     }
 }

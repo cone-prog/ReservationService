@@ -9,7 +9,7 @@ public class GetWorkspaceByIdEndpoint : ICarterModule
         {
             var request = new GetWorkspaceByIdRequest(id);
             var result = await handler.GetWorkspaceByIdAsync(request, cancellationToken);
-            return Results.Ok(result);
+            return TypedResults.Ok(result);
         });
     }
 }

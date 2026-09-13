@@ -1,4 +1,5 @@
 using ReservationService.Endpoints.Reservation.Create;
+using ReservationService.Endpoints.Results;
 using ReservationService.Infrastructure.Context;
 using ReservationService.Models;
 
@@ -110,22 +111,57 @@ public class ReservationRepository(DapperContext dbContext) : IReservationReposi
         return true;
     }
 
-    public async Task ConfirmReservationAsync(Guid id,
+    public async Task<ChangeStatusResult> ConfirmReservationAsync(Guid id,
         CancellationToken cancellationToken)
     {
-        var query = """
+        var queryExist = """
+            SELECT * FROM Reservation WHERE Id = @id FOR UPDATE;
+        """;
+
+        var queryUpdate = """ 
             UPDATE Reservation SET Status = 'Confirmed' WHERE Id = @id
         """;
 
         using var dbConnection = dbContext.CreateConnection();
-        await dbConnection.ExecuteAsync(new CommandDefinition(
-            commandText: query,
-            parameters: new
-            {
-                id,
-            },
-            cancellationToken: cancellationToken
+        await dbConnection.OpenAsync(cancellationToken);
+        using var transaction = await dbConnection.BeginTransactionAsync(
+            cancellationToken);
+
+        var reservation = await dbConnection.QuerySingleOrDefaultAsync<Reservation>(
+            new CommandDefinition(
+                commandText: queryExist,
+                parameters: new
+                {
+                    id,
+                },
+                transaction: transaction,
+                cancellationToken: cancellationToken
         ));
+
+        if (reservation is null) return ChangeStatusResult.NotFound();
+
+        if (reservation.Status != ReservationStatus.Pending)
+            return ChangeStatusResult.InvalidStatusChange(reservation.Status);
+
+        var result = await dbConnection.ExecuteAsync(
+            new CommandDefinition(
+                commandText: queryUpdate,
+                parameters: new
+                {
+                    id,
+                },
+                transaction: transaction,
+                cancellationToken: cancellationToken
+        ));
+
+        if (result == 0)
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            throw new Exception("Произошла непредвиденная ошибка: не удалось обновить статус");
+        }
+
+        await transaction.CommitAsync(cancellationToken);
+        return ChangeStatusResult.Success();
     }
 
     public async Task CancelReservationAsync(Reservation reservation, CancellationToken cancellationToken)

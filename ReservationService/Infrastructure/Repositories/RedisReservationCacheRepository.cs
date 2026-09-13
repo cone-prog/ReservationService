@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Caching.Distributed;
 using ReservationService.Endpoints.Reservation.Create;
+using ReservationService.Endpoints.Results;
 using ReservationService.Models;
 
 namespace ReservationService.Infrastructure.Repositories;
@@ -40,9 +41,9 @@ public class RedisReservationCacheRepository(IReservationRepository reservationR
         return result;
     }
 
-    public async Task ConfirmReservationAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<ChangeStatusResult> ConfirmReservationAsync(Guid id, CancellationToken cancellationToken)
     {
-        await reservationRepository.ConfirmReservationAsync(id, cancellationToken);
+        return await reservationRepository.ConfirmReservationAsync(id, cancellationToken);
     }
 
     public async Task CancelReservationAsync(Reservation reservation, CancellationToken cancellationToken)
