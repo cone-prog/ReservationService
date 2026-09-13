@@ -15,7 +15,6 @@ public class CreateReservationEndpoint : ICarterModule
                 : TypedResults.InternalServerError();
 
             return response;
-        })
-        .WithDescription("Время должно быть в формате: yyyy-MM-ddTHH:mm:ssZ или yyyy-MM-ddTHH:mm:ss±HH:mm");
+        });
     }
 }
