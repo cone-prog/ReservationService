@@ -9,6 +9,7 @@ public class GetAvailableSlotsEndpoint : ICarterModule
         {
             var request = new GetAvailableSlotsRequest(id, date);
             return TypedResults.Ok(await handler.GetAvailabilitySlotsAsync(request, cancellationToken));
-        });
+        })
+        .WithDescription("Дата должна быть в формате: yyyy-MM-dd");
     }
 }
