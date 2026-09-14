@@ -15,17 +15,15 @@ public class CancelReservationHandler(IReservationRepository repository,
         if (!validationResult.IsValid)
             throw new ValidationException(validationResult.Errors);
 
-        var reservation = await repository.GetByIdAsync(request.Id,
+        var result = await repository.CancelReservationAsync(request.Id,
             cancellationToken);
 
-        if (reservation is null)
+        if (result.ResultType == CancelReservationResultType.NotFound)
             throw new NotFoundException("Бронирование", request.Id);
 
-        if (!(reservation.Status == ReservationStatus.Pending
-            || reservation.Status == ReservationStatus.Confirmed))
-            throw new ForbiddenChangeStatusException(reservation.Status.ToString(),
+        if (result.ResultType == CancelReservationResultType.InvalidStatusChange)
+            throw new ForbiddenChangeStatusException(result.CurrentStatus!.Value.ToString(),
                 ReservationStatus.Cancelled.ToString());
 
-        await repository.CancelReservationAsync(reservation, cancellationToken);
     }
 }

@@ -1,5 +1,6 @@
+using ReservationService.Endpoints.Reservation.Cancel;
 using ReservationService.Endpoints.Reservation.Create;
-using ReservationService.Endpoints.Results;
+using ReservationService.Endpoints.Confirm;
 using ReservationService.Infrastructure.Context;
 using ReservationService.Models;
 
@@ -111,7 +112,7 @@ public class ReservationRepository(DapperContext dbContext) : IReservationReposi
         return true;
     }
 
-    public async Task<ChangeStatusResult> ConfirmReservationAsync(Guid id,
+    public async Task<ConfirmReservationResult> ConfirmReservationAsync(Guid id,
         CancellationToken cancellationToken)
     {
         var queryExist = """
@@ -138,10 +139,10 @@ public class ReservationRepository(DapperContext dbContext) : IReservationReposi
                 cancellationToken: cancellationToken
         ));
 
-        if (reservation is null) return ChangeStatusResult.NotFound();
+        if (reservation is null) return ConfirmReservationResult.NotFound();
 
         if (reservation.Status != ReservationStatus.Pending)
-            return ChangeStatusResult.InvalidStatusChange(reservation.Status);
+            return ConfirmReservationResult.InvalidStatusChange(reservation.Status);
 
         var result = await dbConnection.ExecuteAsync(
             new CommandDefinition(
@@ -161,24 +162,60 @@ public class ReservationRepository(DapperContext dbContext) : IReservationReposi
         }
 
         await transaction.CommitAsync(cancellationToken);
-        return ChangeStatusResult.Success();
+        return ConfirmReservationResult.Success();
     }
 
-    public async Task CancelReservationAsync(Reservation reservation, CancellationToken cancellationToken)
+    public async Task<CancelReservationResult> CancelReservationAsync(Guid id,
+        CancellationToken cancellationToken)
     {
-        var query = """
+        var queryExist = """
+            SELECT * FROM Reservation WHERE Id = @id FOR UPDATE
+        """;
+
+        var queryUpdate = """
             UPDATE Reservation SET Status = 'Cancelled' WHERE Id = @id
         """;
 
         using var dbConnection = dbContext.CreateConnection();
-        await dbConnection.ExecuteAsync(new CommandDefinition(
-            commandText: query,
+        await dbConnection.OpenAsync(cancellationToken);
+        await using var transaction = await dbConnection.BeginTransactionAsync(cancellationToken);
+
+        var reservation = await dbConnection.QuerySingleOrDefaultAsync<Reservation>(new CommandDefinition(
+            commandText: queryExist,
             parameters: new
             {
-                id = reservation.Id,
+                id
             },
+            transaction: transaction,
             cancellationToken: cancellationToken
         ));
+
+        if (reservation is null) return CancelReservationResult.NotFound();
+
+        if (!(reservation.Status == ReservationStatus.Pending
+            || reservation.Status == ReservationStatus.Confirmed))
+            return CancelReservationResult.InvalidStatusChange(reservation.Status);
+
+        var result = await dbConnection.ExecuteAsync(
+            new CommandDefinition(
+                commandText: queryUpdate,
+                parameters: new
+                {
+                    id,
+                },
+                transaction: transaction,
+                cancellationToken: cancellationToken
+        ));
+
+        if (result == 0)
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            throw new Exception("Произошла непредвиденная ошибка: не удалось обновить статус");
+        }
+
+        await transaction.CommitAsync(cancellationToken);
+        return CancelReservationResult.Success(reservation.WorkspaceId,
+            reservation.StartAt, reservation.EndAt);
     }
 
     public async Task<List<Reservation>> ExpirePendingReservationsAsync(CancellationToken cancellationToken)

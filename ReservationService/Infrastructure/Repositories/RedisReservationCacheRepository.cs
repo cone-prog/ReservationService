@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Caching.Distributed;
+using ReservationService.Endpoints.Reservation.Cancel;
 using ReservationService.Endpoints.Reservation.Create;
-using ReservationService.Endpoints.Results;
+using ReservationService.Endpoints.Confirm;
 using ReservationService.Models;
 
 namespace ReservationService.Infrastructure.Repositories;
@@ -41,16 +42,18 @@ public class RedisReservationCacheRepository(IReservationRepository reservationR
         return result;
     }
 
-    public async Task<ChangeStatusResult> ConfirmReservationAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<ConfirmReservationResult> ConfirmReservationAsync(Guid id, CancellationToken cancellationToken)
     {
         return await reservationRepository.ConfirmReservationAsync(id, cancellationToken);
     }
 
-    public async Task CancelReservationAsync(Reservation reservation, CancellationToken cancellationToken)
+    public async Task<CancelReservationResult> CancelReservationAsync(Guid id, CancellationToken cancellationToken)
     {
-        await reservationRepository.CancelReservationAsync(reservation, cancellationToken);
+        var result = await reservationRepository.CancelReservationAsync(id, cancellationToken);
 
-        var dates = GetAllDates(reservation.StartAt, reservation.EndAt);
+        if (!result.IsSuccess) return result;
+
+        var dates = GetAllDates(result.StartAt!.Value, result.EndAt!.Value);
 
         foreach (var date in dates)
         {
@@ -59,7 +62,7 @@ public class RedisReservationCacheRepository(IReservationRepository reservationR
             {
                 try
                 {
-                    var key = $"availability:{reservation.WorkspaceId}:{date}";
+                    var key = $"availability:{result.WorkspaceId}:{date}";
                     await distributedCache.RemoveAsync(key, cancellationToken);
                     break;
                 }
@@ -68,7 +71,7 @@ public class RedisReservationCacheRepository(IReservationRepository reservationR
                     logger.LogWarning(
                         ex,
                         "Failed to invalidate availability from Redis for workspace {WorkspaceId} on {Date}",
-                        reservation.WorkspaceId,
+                        result.WorkspaceId,
                         date);
 
                     repeatCount++;
@@ -78,6 +81,7 @@ public class RedisReservationCacheRepository(IReservationRepository reservationR
             while (repeatCount < 3);
         }
 
+        return result;
     }
 
     public async Task<List<Reservation>> ExpirePendingReservationsAsync(CancellationToken cancellationToken)

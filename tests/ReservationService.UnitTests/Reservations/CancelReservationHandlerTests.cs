@@ -2,6 +2,7 @@ using FluentValidation;
 using FluentValidation.Results;
 using Moq;
 using ReservationService.Endpoints.Reservation.Cancel;
+using ReservationService.Endpoints.Confirm;
 using ReservationService.Exceptions;
 using ReservationService.Infrastructure.Repositories;
 using ReservationService.Models;
@@ -39,13 +40,8 @@ public class CancelReservationHandlerTests
             )
         );
 
-        reservationRepository.Verify(r => r.GetByIdAsync(
-                request.Id,
-                It.IsAny<CancellationToken>()
-        ), Times.Never);
-
         reservationRepository.Verify(r => r.CancelReservationAsync(
-            It.IsAny<Reservation>(),
+            request.Id,
             It.IsAny<CancellationToken>()
         ), Times.Never);
     }
@@ -67,10 +63,10 @@ public class CancelReservationHandlerTests
             .ReturnsAsync(new ValidationResult());
 
         reservationRepository
-            .Setup(r => r.GetByIdAsync(
+            .Setup(r => r.CancelReservationAsync(
                 request.Id,
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Reservation?)null);
+            .ReturnsAsync(CancelReservationResult.NotFound());
 
         var handler = new CancelReservationHandler(
             reservationRepository.Object,
@@ -84,15 +80,10 @@ public class CancelReservationHandlerTests
             )
         );
 
-        reservationRepository.Verify(r => r.GetByIdAsync(
-                request.Id,
-                It.IsAny<CancellationToken>()
-        ), Times.Once);
-
         reservationRepository.Verify(r => r.CancelReservationAsync(
-            It.IsAny<Reservation>(),
+            request.Id,
             It.IsAny<CancellationToken>()
-        ), Times.Never);
+        ), Times.Once);
     }
 
     [Theory]
@@ -130,10 +121,10 @@ public class CancelReservationHandlerTests
             .ReturnsAsync(new ValidationResult());
 
         reservationRepository
-            .Setup(r => r.GetByIdAsync(
+            .Setup(r => r.CancelReservationAsync(
                 request.Id,
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(reservation);
+            .ReturnsAsync(CancelReservationResult.InvalidStatusChange(reservation.Status));
 
         var handler = new CancelReservationHandler(
             reservationRepository.Object,
@@ -146,15 +137,10 @@ public class CancelReservationHandlerTests
             )
         );
 
-        reservationRepository.Verify(r => r.GetByIdAsync(
-                request.Id,
-                It.IsAny<CancellationToken>()
-        ), Times.Once);
-
         reservationRepository.Verify(r => r.CancelReservationAsync(
-            reservation,
+            request.Id,
             It.IsAny<CancellationToken>()
-        ), Times.Never);
+        ), Times.Once);
     }
 
     [Theory]
@@ -192,10 +178,11 @@ public class CancelReservationHandlerTests
             .ReturnsAsync(new ValidationResult());
 
         reservationRepository
-            .Setup(r => r.GetByIdAsync(
+            .Setup(r => r.CancelReservationAsync(
                 request.Id,
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(reservation);
+            .ReturnsAsync(CancelReservationResult.Success(reservation.WorkspaceId,
+                reservation.StartAt, reservation.EndAt));
 
         var handler = new CancelReservationHandler(
             reservationRepository.Object,
@@ -204,13 +191,8 @@ public class CancelReservationHandlerTests
         await handler.CancelReservationAsync(request,
             CancellationToken.None);
 
-        reservationRepository.Verify(r => r.GetByIdAsync(
-                request.Id,
-                It.IsAny<CancellationToken>()
-        ), Times.Once);
-
         reservationRepository.Verify(r => r.CancelReservationAsync(
-            reservation,
+            request.Id,
             It.IsAny<CancellationToken>()
         ), Times.Once);
     }

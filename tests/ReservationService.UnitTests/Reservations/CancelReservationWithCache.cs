@@ -1,6 +1,9 @@
+using System.Security.Cryptography;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Moq;
+using ReservationService.Endpoints.Confirm;
+using ReservationService.Endpoints.Reservation.Cancel;
 using ReservationService.Infrastructure.Repositories;
 using ReservationService.Models;
 
@@ -29,8 +32,9 @@ public class CancelReservationWithCache
         };
 
         repository
-            .Setup(r => r.CancelReservationAsync(reservation, It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+            .Setup(r => r.CancelReservationAsync(reservation.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(CancelReservationResult.Success(reservation.WorkspaceId,
+                reservation.StartAt, reservation.EndAt));
 
         distributedCache
             .Setup(c => c.RemoveAsync(
@@ -41,9 +45,11 @@ public class CancelReservationWithCache
         var cacheRepository = new RedisReservationCacheRepository(repository.Object,
             distributedCache.Object, logger.Object);
 
-        await cacheRepository.CancelReservationAsync(
-            reservation,
+        var result = await cacheRepository.CancelReservationAsync(
+            reservation.Id,
             CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
 
         distributedCache
             .Verify(d => d
@@ -61,7 +67,7 @@ public class CancelReservationWithCache
 
         repository.Verify(
             r => r.CancelReservationAsync(
-                reservation,
+                reservation.Id,
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -88,8 +94,9 @@ public class CancelReservationWithCache
         };
 
         repository
-            .Setup(r => r.CancelReservationAsync(reservation, It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+            .Setup(r => r.CancelReservationAsync(reservation.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(CancelReservationResult.Success(reservation.WorkspaceId,
+                reservation.StartAt, reservation.EndAt));
 
         distributedCache
             .Setup(c => c.RemoveAsync(
@@ -100,9 +107,11 @@ public class CancelReservationWithCache
         var cacheRepository = new RedisReservationCacheRepository(repository.Object,
             distributedCache.Object, logger.Object);
 
-        await cacheRepository.CancelReservationAsync(
-            reservation,
+        var result = await cacheRepository.CancelReservationAsync(
+            reservation.Id,
             CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
 
         distributedCache
             .Verify(d => d
@@ -111,17 +120,16 @@ public class CancelReservationWithCache
                     It.IsAny<CancellationToken>()),
                 Times.Once);
 
-
         distributedCache
-                .Verify(d => d
-                    .RemoveAsync(
-                        It.IsAny<string>(),
-                        It.IsAny<CancellationToken>()),
-                    Times.Once);
+            .Verify(d => d
+                .RemoveAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()),
+                Times.Once);
 
         repository.Verify(
             r => r.CancelReservationAsync(
-                reservation,
+                reservation.Id,
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -148,8 +156,9 @@ public class CancelReservationWithCache
         };
 
         repository
-            .Setup(r => r.CancelReservationAsync(reservation, It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+            .Setup(r => r.CancelReservationAsync(reservation.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(CancelReservationResult.Success(reservation.WorkspaceId,
+                reservation.StartAt, reservation.EndAt));
 
         distributedCache
             .Setup(c => c.RemoveAsync(
@@ -160,9 +169,11 @@ public class CancelReservationWithCache
         var cacheRepository = new RedisReservationCacheRepository(repository.Object,
             distributedCache.Object, logger.Object);
 
-        await cacheRepository.CancelReservationAsync(
-            reservation,
+        var result = await cacheRepository.CancelReservationAsync(
+            reservation.Id,
             CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
 
         distributedCache
             .Verify(d => d
@@ -187,7 +198,7 @@ public class CancelReservationWithCache
 
         repository.Verify(
             r => r.CancelReservationAsync(
-                reservation,
+                reservation.Id,
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -223,8 +234,10 @@ public class CancelReservationWithCache
         };
 
         repository
-            .Setup(r => r.CancelReservationAsync(reservation, It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+            .Setup(r => r.CancelReservationAsync(reservation.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(CancelReservationResult.Success(reservation.WorkspaceId,
+                reservation.StartAt, reservation.EndAt));
+
 
         distributedCache
             .Setup(c => c.RemoveAsync(
@@ -235,9 +248,11 @@ public class CancelReservationWithCache
         var cacheRepository = new RedisReservationCacheRepository(repository.Object,
             distributedCache.Object, logger.Object);
 
-        await cacheRepository.CancelReservationAsync(
-            reservation,
+        var result = await cacheRepository.CancelReservationAsync(
+            reservation.Id,
             CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
 
         foreach (var date in dates)
         {
@@ -258,7 +273,7 @@ public class CancelReservationWithCache
 
         repository.Verify(
             r => r.CancelReservationAsync(
-                reservation,
+                reservation.Id,
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }

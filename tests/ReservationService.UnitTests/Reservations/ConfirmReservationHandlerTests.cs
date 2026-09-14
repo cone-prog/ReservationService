@@ -2,7 +2,7 @@ using FluentValidation;
 using FluentValidation.Results;
 using Moq;
 using ReservationService.Endpoints.Reservation.Confirm;
-using ReservationService.Endpoints.Results;
+using ReservationService.Endpoints.Confirm;
 using ReservationService.Exceptions;
 using ReservationService.Infrastructure.Repositories;
 using ReservationService.Models;
@@ -67,7 +67,7 @@ public class ConfirmReservationHandlerTests
                 request.Id,
                 It.IsAny<CancellationToken>()
             ))
-            .ReturnsAsync(ChangeStatusResult.NotFound());
+            .ReturnsAsync(ConfirmReservationResult.NotFound());
 
         var handler = new ConfirmReservationHandler(
             reservationRepository.Object,
@@ -128,7 +128,7 @@ public class ConfirmReservationHandlerTests
                 reservation.Id,
                 It.IsAny<CancellationToken>()
             ))
-            .ReturnsAsync(ChangeStatusResult.InvalidStatusChange(reservation.Status));
+            .ReturnsAsync(ConfirmReservationResult.InvalidStatusChange(reservation.Status));
 
         var handler = new ConfirmReservationHandler(
             reservationRepository.Object,
@@ -183,7 +183,7 @@ public class ConfirmReservationHandlerTests
                 reservation.Id,
                 It.IsAny<CancellationToken>()
             ))
-            .ReturnsAsync(ChangeStatusResult.Success());
+            .ReturnsAsync(ConfirmReservationResult.Success());
 
         var handler = new ConfirmReservationHandler(
             reservationRepository.Object,

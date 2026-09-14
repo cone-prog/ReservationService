@@ -74,19 +74,20 @@ public class CancelReservationAsyncWithCache(DatabaseAndRedisFixture fixture)
         var oldCacheResult = JsonSerializer.Deserialize<List<Slot>>(
             await distributedCache.GetAsync(key, CancellationToken.None));
 
-        await repository.CancelReservationAsync(reservation,
+        await repository.CancelReservationAsync(reservation.Id,
             CancellationToken.None);
+
         var cancelledReservationStatus = await dbConnection.QuerySingleAsync<string>(
-                new CommandDefinition(
-                    commandText: """
-                        SELECT Status
-                        FROM Reservation
-                        WHERE Id = @id
-                    """,
-                    parameters: new
-                    {
-                        reservation.Id
-                    }
+            new CommandDefinition(
+                commandText: """
+                    SELECT Status
+                    FROM Reservation
+                    WHERE Id = @id
+                """,
+                parameters: new
+                {
+                    reservation.Id
+                }
         ));
 
         var newCacheResult = await distributedCache.GetAsync(key, CancellationToken.None);
